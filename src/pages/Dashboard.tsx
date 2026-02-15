@@ -13,6 +13,7 @@ import {
 import { PageHeader } from '@/components/PageHeader';
 import { QuickTile } from '@/components/QuickTile';
 import { DataCard } from '@/components/DataCard';
+import { StatCard } from '@/components/StatCard';
 import { faculties } from '@/data/faculties';
 import { englishRequirements } from '@/data/english-requirements';
 import { egyptianTuitionFees, installmentPlans, formatEGP } from '@/data/fees';
@@ -39,6 +40,14 @@ export const Dashboard = ({ onSearchClick }: DashboardProps) => {
 
   // Calculate total programs
   const totalPrograms = faculties.reduce((acc, f) => acc + f.programs.length, 0);
+  const statCards = [
+    { title: 'Faculties', value: faculties.length, icon: GraduationCap, route: '/faculties' },
+    { title: 'Programs', value: totalPrograms, icon: GraduationCap, route: '/faculties' },
+    { title: 'English Tests', value: englishRequirements.length, icon: Languages, route: '/english' },
+    { title: 'Fee Categories', value: 4, icon: CreditCard, route: '/fees' },
+    { title: 'Scholarships', value: 4, icon: Award, route: '/policies/scholarship' },
+    { title: 'Policies', value: policies.length, icon: FileCheck, route: '/policies/all' },
+  ];
 
   return (
     <div className="animate-fade-in">
@@ -58,48 +67,15 @@ export const Dashboard = ({ onSearchClick }: DashboardProps) => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <GraduationCap className="w-4 h-4" />
-            <span className="text-xs font-medium">Faculties</span>
-          </div>
-          <p className="text-2xl font-bold">{faculties.length}</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <FileCheck className="w-4 h-4" />
-            <span className="text-xs font-medium">Programs</span>
-          </div>
-          <p className="text-2xl font-bold">{totalPrograms}</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <Languages className="w-4 h-4" />
-            <span className="text-xs font-medium">English Tests</span>
-          </div>
-          <p className="text-2xl font-bold">{englishRequirements.length}</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <CreditCard className="w-4 h-4" />
-            <span className="text-xs font-medium">Fee Categories</span>
-          </div>
-          <p className="text-2xl font-bold">4</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <Award className="w-4 h-4" />
-            <span className="text-xs font-medium">Scholarships</span>
-          </div>
-          <p className="text-2xl font-bold">4</p>
-        </div>
-        <div className="stat-card">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <FileCheck className="w-4 h-4" />
-            <span className="text-xs font-medium">Policies</span>
-          </div>
-          <p className="text-2xl font-bold">{policies.length}</p>
-        </div>
+        {statCards.map((card) => (
+          <StatCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            icon={card.icon}
+            route={card.route}
+          />
+        ))}
       </div>
 
       {/* Quick Access Tiles */}
@@ -198,7 +174,7 @@ export const Dashboard = ({ onSearchClick }: DashboardProps) => {
           title="Refund Policy"
           value="CPNU Rules"
           subtitle="View Timeline"
-          icon={Bus}
+          icon={FileCheck}
           href="/policies/refund"
         />
       </div>
