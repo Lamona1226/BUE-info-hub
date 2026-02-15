@@ -1,4 +1,6 @@
- // ============= Contact Directory Data =============
+import { facultyContactsSeed } from "./faculty-contacts-seed";
+
+// ============= Contact Directory Data =============
  export interface Contact {
    name: string;
    title?: string;
@@ -21,7 +23,7 @@ export interface ContactDirectoryEntry {
    contacts: Contact[];
  }
  
- export const departments: Department[] = [
+const baseDepartments: Department[] = [
    {
      name: "Reception & President's Office",
      head: "Mr. Mohamed Lotfi",
@@ -328,7 +330,53 @@ export interface ContactDirectoryEntry {
      headExtension: "1850",
      contacts: [],
    },
- ];
+];
+
+const normalizeContactKey = (contact: Pick<Contact, "name" | "extension">): string =>
+  `${contact.name.trim().toLowerCase()}::${contact.extension.trim().toLowerCase()}`;
+
+const dedupeContacts = (contacts: Contact[]): Contact[] => {
+  const seen = new Set<string>();
+  return contacts.filter((contact) => {
+    const key = normalizeContactKey(contact);
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
+
+const mergeDepartments = (source: Department[]): Department[] => {
+  const merged = new Map<string, Department>();
+
+  source.forEach((department) => {
+    const existing = merged.get(department.name);
+
+    if (!existing) {
+      merged.set(department.name, {
+        ...department,
+        contacts: dedupeContacts([...department.contacts]),
+      });
+      return;
+    }
+
+    existing.contacts = dedupeContacts([...existing.contacts, ...department.contacts]);
+    if (!existing.head && department.head) {
+      existing.head = department.head;
+    }
+    if (!existing.headExtension && department.headExtension) {
+      existing.headExtension = department.headExtension;
+    }
+  });
+
+  return Array.from(merged.values());
+};
+
+export const departments: Department[] = mergeDepartments([
+  ...baseDepartments,
+  ...facultyContactsSeed,
+]);
  
  // Flatten all contacts for search
  export const getAllContacts = (): (Contact & { departmentName: string })[] => {
@@ -363,6 +411,7 @@ export interface ContactDirectoryEntry {
      c.name.toLowerCase().includes(lowerQuery) ||
      c.extension.includes(query) ||
      c.departmentName.toLowerCase().includes(lowerQuery) ||
+    (c.title && c.title.toLowerCase().includes(lowerQuery)) ||
      (c.role && c.role.toLowerCase().includes(lowerQuery))
    );
  };
@@ -371,7 +420,7 @@ export const contactDirectoryEntries: ContactDirectoryEntry[] = getAllContacts()
   departmentName: contact.departmentName,
   extension: contact.extension,
   directNumber: contact.extension.includes('-') ? contact.extension : undefined,
-  notes: contact.role,
+  notes: contact.title ?? contact.role,
 }));
 
 export const contactDirectoryDepartments = Array.from(

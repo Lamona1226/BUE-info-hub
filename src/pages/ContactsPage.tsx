@@ -27,10 +27,11 @@ export const ContactsPage = () => {
         department: dept,
         rows: [
           ...(dept.head && dept.headExtension
-            ? [{ name: dept.head, extension: dept.headExtension }]
+            ? [{ name: dept.head, title: "Head", extension: dept.headExtension }]
             : []),
           ...dept.contacts.map((contact) => ({
             name: contact.name,
+            title: contact.title,
             extension: contact.extension,
           })),
         ],
@@ -41,15 +42,17 @@ export const ContactsPage = () => {
       .map((dept) => {
         const rows = [
           ...(dept.head && dept.headExtension
-            ? [{ name: dept.head, extension: dept.headExtension }]
+            ? [{ name: dept.head, title: "Head", extension: dept.headExtension }]
             : []),
           ...dept.contacts.map((contact) => ({
             name: contact.name,
+            title: contact.title,
             extension: contact.extension,
           })),
         ].filter((row) => {
           return (
             row.name.toLowerCase().includes(query) ||
+            (row.title && row.title.toLowerCase().includes(query)) ||
             row.extension.toLowerCase().includes(query) ||
             dept.name.toLowerCase().includes(query)
           );
@@ -110,6 +113,7 @@ export const ContactsPage = () => {
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="text-left p-3 font-semibold">Staff Name</th>
+                    <th className="text-left p-3 font-semibold">Title</th>
                     <th className="text-left p-3 font-semibold">Internal Extension</th>
                   </tr>
                 </thead>
@@ -118,12 +122,13 @@ export const ContactsPage = () => {
                     rows.map((row, index) => (
                       <tr key={`${department.name}-${row.extension}-${index}`} className="border-t border-border">
                         <td className="p-3 font-medium text-foreground">{row.name}</td>
+                        <td className="p-3 text-muted-foreground">{row.title || "—"}</td>
                         <td className="p-3 text-muted-foreground">{row.extension || '—'}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={2} className="p-6 text-center text-muted-foreground">
+                      <td colSpan={3} className="p-6 text-center text-muted-foreground">
                         No contacts listed for this department.
                       </td>
                     </tr>
