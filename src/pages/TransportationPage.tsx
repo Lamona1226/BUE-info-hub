@@ -36,6 +36,12 @@ export const TransportationPage = () => {
           <Switch checked={sortByPrice} onCheckedChange={setSortByPrice} />
         </div>
 
+        <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4">
+          <p className="text-sm font-medium text-blue-900">
+            These transportation fees apply to both Egyptian and International students.
+          </p>
+        </div>
+
         <div className="rounded-xl border border-border bg-muted/20 p-4">
           <p className="text-sm font-medium text-foreground mb-3">
             {accommodationTransportCopy.compareTitle}

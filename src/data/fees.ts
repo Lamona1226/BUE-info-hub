@@ -260,7 +260,7 @@ export interface AccommodationOption {
   id: string;
   name: string;
   feePerYear: number;
-  currency: 'EGP';
+  currency: 'EGP' | 'GBP';
   features: string[];
   compareTag: string;
 }
@@ -312,6 +312,49 @@ export const accommodationOptions: AccommodationOption[] = [
     name: 'Premium Single Room',
     feePerYear: 95000,
     currency: 'EGP',
+    features: ['Single occupancy', 'Premium amenities', 'Priority services'],
+    compareTag: 'Premium',
+  },
+];
+
+export const internationalAccommodationOptions: AccommodationOption[] = [
+  {
+    id: 'triple-room-intl',
+    name: 'Triple Room',
+    feePerYear: 1800,
+    currency: 'GBP',
+    features: ['Shared occupancy', 'Standard furnishings', 'Annual contract'],
+    compareTag: 'Best value',
+  },
+  {
+    id: 'double-room-intl',
+    name: 'Double Room',
+    feePerYear: 2500,
+    currency: 'GBP',
+    features: ['Double occupancy', 'Upgraded storage', 'Annual contract'],
+    compareTag: 'Balanced',
+  },
+  {
+    id: 'premium-double-intl',
+    name: 'Premium Double Room',
+    feePerYear: 3000,
+    currency: 'GBP',
+    features: ['Double occupancy', 'Premium amenities', 'Preferred floor'],
+    compareTag: 'Comfort',
+  },
+  {
+    id: 'single-room-intl',
+    name: 'Single Room',
+    feePerYear: 3500,
+    currency: 'GBP',
+    features: ['Single occupancy', 'Quiet zone', 'Annual contract'],
+    compareTag: 'Private',
+  },
+  {
+    id: 'premium-single-intl',
+    name: 'Premium Single Room',
+    feePerYear: 4000,
+    currency: 'GBP',
     features: ['Single occupancy', 'Premium amenities', 'Priority services'],
     compareTag: 'Premium',
   },
