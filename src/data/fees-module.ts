@@ -4,8 +4,8 @@ import {
   internationalTuitionFees,
   scholarshipMaintenance,
   scholarshipNotes,
-  scholarshipThresholds,
 } from '@/data/fees';
+import { getScholarshipThresholdForFaculty } from '@/lib/eligibility';
 
 export type StudentType = 'egyptian' | 'international';
 export type FacultyGroupId = 'Technology' | 'Social Sciences' | 'Languages' | 'Health';
@@ -136,15 +136,7 @@ export interface TuitionRow {
 
 const normalize = (value: string) => value.toLowerCase().trim();
 
-const findThresholdForFaculty = (faculty: string) => {
-  return scholarshipThresholds.find((threshold) =>
-    threshold.faculties.some(
-      (listed) =>
-        normalize(listed).includes(normalize(faculty)) ||
-        normalize(faculty).includes(normalize(listed))
-    )
-  );
-};
+const findThresholdForFaculty = (faculty: string) => getScholarshipThresholdForFaculty(faculty);
 
 const standardDiscounts = {
   B: '15%',

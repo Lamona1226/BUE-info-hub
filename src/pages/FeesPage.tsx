@@ -18,44 +18,13 @@ import {
   formatEGP,
   formatGBP,
   internationalTuitionFees,
-  scholarshipThresholds,
 } from '@/data/fees';
 import { scholarshipCategoryStyles, tuitionDataByStudentType } from '@/data/fees-module';
+import { calculateEligibilityForFees } from '@/lib/eligibility';
 
 export const FeesPage = () => {
   const [certificateType, setCertificateType] = useState<string>('');
   const [scoreInput, setScoreInput] = useState('');
-
-  const parsePercentValue = (value: string) => {
-    const match = value.match(/(\d+(?:\.\d+)?)/);
-    return match ? Number(match[1]) : 0;
-  };
-
-  const findThresholdForFaculty = (faculty: string) => {
-    const normalize = (value: string) => value.toLowerCase().trim();
-    return scholarshipThresholds.find((threshold) =>
-      threshold.faculties.some(
-        (listed) =>
-          normalize(listed).includes(normalize(faculty)) ||
-          normalize(faculty).includes(normalize(listed))
-      )
-    );
-  };
-
-  const certificateKey = (type: string) => {
-    switch (type) {
-      case 'igcse':
-        return 'igcse';
-      case 'american':
-        return 'american';
-      case 'thanaweya':
-        return 'thanwya';
-      case 'other':
-        return 'igcse';
-      default:
-        return 'igcse';
-    }
-  };
 
   const scoreValue = Number(scoreInput);
   const scoreValid = scoreInput.trim().length > 0 && !Number.isNaN(scoreValue);
@@ -65,56 +34,12 @@ export const FeesPage = () => {
       return { egyptian: [], international: [], allBelowThreshold: false };
     }
 
-    const key = certificateKey(certificateType);
-
-    const computeResults = (fees: typeof egyptianTuitionFees) =>
-      fees
-        .map((fee) => {
-          const threshold = findThresholdForFaculty(fee.faculty);
-          if (!threshold) return null;
-
-          const cert = threshold.certificates[key];
-          if (!cert) return null;
-
-          const scoreB = parsePercentValue(cert.B);
-          const scoreA = parsePercentValue(cert.A);
-          const scoreAStar = parsePercentValue(cert.AStar);
-
-          let category: 'AStar' | 'A' | 'B' | 'C' = 'C';
-          if (scoreValue >= scoreAStar) category = 'AStar';
-          else if (scoreValue >= scoreA) category = 'A';
-          else if (scoreValue >= scoreB) category = 'B';
-
-          const discount =
-            category === 'AStar'
-              ? threshold.discountAStar
-              : category === 'A'
-                ? threshold.discountA
-                : category === 'B'
-                  ? threshold.discountB
-                  : '0%';
-
-          const discountedFee =
-            category === 'AStar'
-              ? fee.categoryAStar
-              : category === 'A'
-                ? fee.categoryA
-                : category === 'B'
-                  ? fee.categoryB
-                  : fee.categoryC;
-
-          return {
-            faculty: fee.faculty,
-            program: fee.program,
-            category,
-            discount,
-            discountedFee,
-          };
-        })
-        .filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-    const egyptianResults = computeResults(egyptianTuitionFees);
-    const internationalResults = computeResults(internationalTuitionFees);
+    const egyptianResults = calculateEligibilityForFees(egyptianTuitionFees, certificateType, scoreValue);
+    const internationalResults = calculateEligibilityForFees(
+      internationalTuitionFees,
+      certificateType,
+      scoreValue
+    );
     const allBelowThreshold =
       egyptianResults.length > 0 &&
       internationalResults.length > 0 &&
