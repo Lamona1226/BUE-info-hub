@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppSidebar } from '@/components/AppSidebar';
 import { CommandSearch } from '@/components/CommandSearch';
 import { Dashboard } from '@/pages/Dashboard';
@@ -46,7 +46,8 @@ const AppLayout = () => {
             <Route path="/faculties" element={<FacultiesPage />} />
             <Route path="/english" element={<EnglishRequirementsPage />} />
             <Route path="/requirements" element={<RequirementsPage />} />
-            <Route path="/requirements/details" element={<RequirementsDetailsPage />} />
+            <Route path="/requirements/details" element={<Navigate to="/requirements" replace />} />
+            <Route path="/requirements/:certificateType" element={<RequirementsDetailsPage />} />
             <Route path="/fees" element={<FeesPage />} />
             <Route path="/fees/scholarships" element={<ScholarshipsPage />} />
             <Route path="/fees/accommodation" element={<AccommodationPage />} />

@@ -73,7 +73,7 @@ export const searchAll = (query: string): SearchResult[] => {
         type: 'admission',
         title: `${r.curriculum} Requirements`,
         subtitle: `${r.studentType} students`,
-        path: `/requirements#${r.id}`,
+        path: `/requirements/${r.id}`,
         icon: 'FileCheck',
         lastUpdated: r.lastUpdated,
       });

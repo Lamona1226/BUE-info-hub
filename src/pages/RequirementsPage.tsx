@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
-import { FileCheck, GraduationCap, Info } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Layers, ScrollText, Users } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { RequirementsErrorBoundary } from '../components/RequirementsErrorBoundary';
 import {
   admissionRequirements,
@@ -12,6 +9,11 @@ import {
   type AdmissionRequirement,
 } from '@/data/admission-requirements';
 import { RequirementsModuleNav } from '../components/RequirementsModuleNav';
+import {
+  RequirementOverviewCard,
+  renderTextCards,
+  studentTypeStyles,
+} from '@/components/requirements/RequirementCards';
 
 interface RequirementspageProps {
   requirementsData?: AdmissionRequirement[];
@@ -21,41 +23,6 @@ interface RequirementspageProps {
   errorMessage?: string;
 }
 
-const studentTypeStyles: Record<AdmissionRequirement['studentType'], string> = {
-  Egyptian: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  International: 'bg-blue-100 text-blue-700 border-blue-200',
-  Both: 'bg-slate-100 text-slate-700 border-slate-200',
-};
-
-const requirementCard =
-  'rounded-2xl border border-border bg-card p-6 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01] flex flex-col gap-4';
-
-const renderTextCards = (items: string[], accent: string) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-    {items.map((item, index) => (
-      <div key={`${item}-${index}`} className={`rounded-2xl border ${accent} p-4 shadow-md`}>
-        <div className="flex items-start gap-2">
-          <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-foreground">{item}</p>
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
-const renderDetailCards = (title: string, items: string[], accent: string) => (
-  <div className="space-y-3">
-    <h4 className="text-sm font-semibold text-foreground">{title}</h4>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {items.map((item, index) => (
-        <div key={`${title}-${index}`} className={`rounded-xl border ${accent} p-3`}>
-          <p className="text-sm text-foreground">{item}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 export const Requirementspage = ({
   requirementsData = [],
   generalNotes = [],
@@ -64,7 +31,6 @@ export const Requirementspage = ({
   errorMessage,
 }: RequirementspageProps) => {
   const hasData = requirementsData.length > 0;
-  const gridClass = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6';
 
   const groupedByStudentType = useMemo(() => {
     return {
@@ -74,11 +40,35 @@ export const Requirementspage = ({
     };
   }, [requirementsData]);
 
+  const dashboardStats = useMemo(
+    () => [
+      {
+        label: 'Certificate Types',
+        value: requirementsData.length,
+        icon: Layers,
+        helper: 'Available requirement cards',
+      },
+      {
+        label: 'General Notes',
+        value: generalNotes.length,
+        icon: ScrollText,
+        helper: 'Shared admission guidance',
+      },
+      {
+        label: 'International Notes',
+        value: internationalNotes.length,
+        icon: Users,
+        helper: 'International student guidance',
+      },
+    ],
+    [generalNotes.length, internationalNotes.length, requirementsData.length]
+  );
+
   return (
     <div className="animate-fade-in">
       <PageHeader
         title="Admission Requirements"
-        description="Card-based requirements overview with full details per curriculum."
+        description="Overview dashboard with certificate cards and dedicated details pages."
       />
       <RequirementsModuleNav />
 
@@ -88,6 +78,26 @@ export const Requirementspage = ({
           <p className="text-sm text-muted-foreground mt-1">{errorMessage}</p>
         </div>
       )}
+
+      <section className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {dashboardStats.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className="text-2xl font-semibold text-foreground">{item.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{item.helper}</p>
+                </div>
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </section>
 
       {generalNotes.length > 0 && (
         <section className="mb-8">
@@ -112,49 +122,21 @@ export const Requirementspage = ({
         </div>
       )}
 
-      {(['Egyptian', 'International', 'Both'] as AdmissionRequirement['studentType'][]).map((group) => (
-        <section key={group} className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">{group} Requirements</h2>
-            <Badge className={`border ${studentTypeStyles[group]}`}>
-              {group === 'Both' ? 'All Students' : `${group} Students`}
-            </Badge>
-          </div>
-          <div className={gridClass}>
-            {groupedByStudentType[group].map((req) => (
-              <div key={req.id} className={requirementCard} role="button" tabIndex={0} aria-label={`View details for ${req.curriculum}`}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <GraduationCap className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-foreground">{req.curriculum}</h3>
-                      <p className="text-xs text-muted-foreground">Curriculum</p>
-                    </div>
-                  </div>
-                  <Badge className={`border ${studentTypeStyles[req.studentType]}`}>
-                    {req.studentType === 'Both' ? 'All Students' : req.studentType}
-                  </Badge>
-                </div>
-                <div className="rounded-xl border border-border bg-muted/40 p-3">
-                  <p className="text-xs text-muted-foreground">General requirements</p>
-                  <p className="text-sm text-foreground">{req.generalRequirements.length} items</p>
-                </div>
-                {req.minimumScores && (
-                  <div className="rounded-xl border border-border bg-emerald-50/70 p-3">
-                    <p className="text-xs text-muted-foreground">Minimum scores</p>
-                    <p className="text-sm text-foreground">{Object.keys(req.minimumScores).length} items</p>
-                  </div>
-                )}
-                <Button asChild type="button" variant="secondary" aria-label={`View full details for ${req.curriculum}`}>
-                  <Link to={`/requirements/details?curriculum=${encodeURIComponent(req.id)}`}>View Details</Link>
-                </Button>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-center gap-2">
+          {(['Egyptian', 'International', 'Both'] as AdmissionRequirement['studentType'][]).map((group) => (
+            <span key={group} className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium ${studentTypeStyles[group]}`}>
+              {group === 'Both' ? `All Students (${groupedByStudentType[group].length})` : `${group} Students (${groupedByStudentType[group].length})`}
+            </span>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {requirementsData.map((req) => (
+            <RequirementOverviewCard key={req.id} requirement={req} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
