@@ -10,6 +10,7 @@ export const RequirementsModuleNav = ({ currentCertificate }: RequirementsModule
 
   const requirementNavTabs = [
     { label: 'Requirements', path: '/requirements' },
+    { label: 'Minimum Admission', path: '/requirements/minimum-admission' },
     {
       label: 'View Details',
       path: currentCertificate ? `/requirements/${encodeURIComponent(currentCertificate)}` : '/requirements',

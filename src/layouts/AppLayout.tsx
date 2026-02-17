@@ -17,6 +17,7 @@ import { ScholarshipsPage } from '@/pages/ScholarshipsPage';
 import { ContactsPage } from '@/pages/ContactsPage';
 import { ScholarshipPoliciesPage } from '@/pages/ScholarshipPoliciesPage';
 import { InstallmentPoliciesPage } from '@/pages/InstallmentPoliciesPage';
+import { MinimumAdmissionRequirementsPage } from '@/pages/MinimumAdmissionRequirementsPage';
 
 const AppLayout = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -46,6 +47,7 @@ const AppLayout = () => {
             <Route path="/faculties" element={<FacultiesPage />} />
             <Route path="/english" element={<EnglishRequirementsPage />} />
             <Route path="/requirements" element={<RequirementsPage />} />
+            <Route path="/requirements/minimum-admission" element={<MinimumAdmissionRequirementsPage />} />
             <Route path="/requirements/details" element={<Navigate to="/requirements" replace />} />
             <Route path="/requirements/:certificateType" element={<RequirementsDetailsPage />} />
             <Route path="/fees" element={<FeesPage />} />

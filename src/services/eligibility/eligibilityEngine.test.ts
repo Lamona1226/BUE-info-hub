@@ -46,4 +46,12 @@ describe("eligibility hardening", () => {
     expect(result.international.length).toBeGreaterThan(0);
     expect(result.allBelowThreshold).toBe(false);
   });
+
+  it("returns not eligible when minimum admission is not met", () => {
+    const result = calculateFinderEligibility("igcse", 50);
+    const dentistry = result.egyptian.find((item) => item.faculty === "Dentistry");
+    expect(dentistry).toBeDefined();
+    expect(dentistry?.status).toBe("not_eligible");
+    expect(dentistry?.minimumRequiredScore).toBe(82);
+  });
 });

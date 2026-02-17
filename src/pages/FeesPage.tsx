@@ -118,15 +118,26 @@ export const FeesPage = () => {
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.faculty}</p>
                         {item.program && <p className="text-xs text-muted-foreground">{item.program}</p>}
+                        {item.status === 'not_eligible' && (
+                          <p className="text-xs text-destructive mt-1">
+                            Not Eligible (minimum required: {item.minimumRequiredScore}%)
+                          </p>
+                        )}
                       </div>
-                      <Badge className={`text-xs ${scholarshipCategoryStyles[item.category].badge}`}>
-                        Category {item.category === 'AStar' ? 'A*' : item.category}
-                      </Badge>
+                      {item.status === 'eligible' && item.category ? (
+                        <Badge className={`text-xs ${scholarshipCategoryStyles[item.category].badge}`}>
+                          Category {item.category === 'AStar' ? 'A*' : item.category}
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive" className="text-xs">Not Eligible</Badge>
+                      )}
                     </div>
-                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{item.discount} scholarship</span>
-                      <span className="font-medium text-foreground">{formatEGP(item.discountedFee)}</span>
-                    </div>
+                    {item.status === 'eligible' && typeof item.discountedFee === 'number' && (
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{item.discount} scholarship</span>
+                        <span className="font-medium text-foreground">{formatEGP(item.discountedFee)}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -144,15 +155,26 @@ export const FeesPage = () => {
                       <div>
                         <p className="text-sm font-medium text-foreground">{item.faculty}</p>
                         {item.program && <p className="text-xs text-muted-foreground">{item.program}</p>}
+                        {item.status === 'not_eligible' && (
+                          <p className="text-xs text-destructive mt-1">
+                            Not Eligible (minimum required: {item.minimumRequiredScore}%)
+                          </p>
+                        )}
                       </div>
-                      <Badge className={`text-xs ${scholarshipCategoryStyles[item.category].badge}`}>
-                        Category {item.category === 'AStar' ? 'A*' : item.category}
-                      </Badge>
+                      {item.status === 'eligible' && item.category ? (
+                        <Badge className={`text-xs ${scholarshipCategoryStyles[item.category].badge}`}>
+                          Category {item.category === 'AStar' ? 'A*' : item.category}
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive" className="text-xs">Not Eligible</Badge>
+                      )}
                     </div>
-                    <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{item.discount} scholarship</span>
-                      <span className="font-medium text-foreground">{formatGBP(item.discountedFee)}</span>
-                    </div>
+                    {item.status === 'eligible' && typeof item.discountedFee === 'number' && (
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{item.discount} scholarship</span>
+                        <span className="font-medium text-foreground">{formatGBP(item.discountedFee)}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

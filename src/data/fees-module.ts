@@ -1,11 +1,9 @@
-import { Award, BookOpen, Cpu, HeartPulse, Languages, Network } from 'lucide-react';
+import { Award, Cpu, HeartPulse, Languages, Network } from 'lucide-react';
 import {
-  egyptianTuitionFees,
-  internationalTuitionFees,
-  scholarshipMaintenance,
-  scholarshipNotes,
-  scholarshipThresholds,
-} from '@/data/fees';
+  facultyFeeConfig2026,
+  scholarshipDiscountByTier2026,
+  type ScholarshipThresholdBand2026,
+} from '@/data/fees-2026';
 
 export type StudentType = 'egyptian' | 'international';
 export type FacultyGroupId = 'Technology' | 'Social Sciences' | 'Languages' | 'Health';
@@ -115,122 +113,83 @@ export const tuitionFilterPlaceholders = {
 export interface TuitionRow {
   id: string;
   faculty: string;
-  program?: string;
   group: FacultyGroupId;
-  baseTuition: number;
-  discounts: {
+  tuitionFees: number;
+  educationalSupportServices: number;
+  administrative: number;
+  categoryC: number;
+  categoryB: number;
+  categoryA: number;
+  categoryAStar: number;
+  thresholdBands: {
+    thanaweya: ScholarshipThresholdBand2026;
+    alAzhar: ScholarshipThresholdBand2026;
+    stem: ScholarshipThresholdBand2026;
+    nile: ScholarshipThresholdBand2026;
+    ig: ScholarshipThresholdBand2026;
+    american: ScholarshipThresholdBand2026;
+    arab: ScholarshipThresholdBand2026;
+  };
+  discountPolicy: {
     B: string;
     A: string;
     AStar: string;
   };
-  thresholds: {
-    igcse: string;
-    american: string;
-    thanaweya: string;
-    other: string;
-  };
-  exceptions: string[];
-  scholarshipRules: string[];
-  renewalRequirements: string[];
 }
 
-const normalize = (value: string) => value.toLowerCase().trim();
-
-const findThresholdForFaculty = (faculty: string) => {
-  return scholarshipThresholds.find((threshold) =>
-    threshold.faculties.some(
-      (listed) =>
-        normalize(listed).includes(normalize(faculty)) ||
-        normalize(faculty).includes(normalize(listed))
-    )
-  );
+const groupByFaculty = (faculty: string): FacultyGroupId => {
+  const value = faculty.toLowerCase();
+  if (
+    value.includes('engineering') ||
+    value.includes('computer') ||
+    value.includes('art')
+  ) return 'Technology';
+  if (value.includes('english') || value.includes('chinese')) return 'Languages';
+  if (
+    value.includes('dentistry') ||
+    value.includes('pharmacy') ||
+    value.includes('physiotherapy') ||
+    value.includes('nursing')
+  ) return 'Health';
+  return 'Social Sciences';
 };
 
-const standardDiscounts = {
-  B: '15%',
-  A: '30%',
-  AStar: '40%',
-};
+const normalizeThresholdBands = (bands: TuitionRow['thresholdBands']) => ({
+  ...bands,
+});
 
-const exceptionNotes = [
-  {
-    match: ['Dentistry'],
-    note: 'Dentistry exception: B=10%, A=15%, A*=20%.',
-  },
-  {
-    match: ['English Language and Literature'],
-    note: 'English exception: B=30%, A=40%, A*=50%.',
-  },
-];
-
-const getExceptionNotes = (faculty: string, discounts: { B: string; A: string; AStar: string }) => {
-  const hasException =
-    discounts.B !== standardDiscounts.B ||
-    discounts.A !== standardDiscounts.A ||
-    discounts.AStar !== standardDiscounts.AStar;
-
-  if (!hasException) {
-    return [];
+const resolveDiscountPolicy = (faculty: string): TuitionRow['discountPolicy'] => {
+  const value = faculty.toLowerCase();
+  if (value.includes('dentistry')) return scholarshipDiscountByTier2026.dentistry;
+  if (value.includes('english') || value.includes('chinese')) {
+    return scholarshipDiscountByTier2026.englishAndChinese;
   }
-
-  return exceptionNotes
-    .filter((entry) => entry.match.some((match) => normalize(faculty).includes(normalize(match))))
-    .map((entry) => entry.note);
+  return scholarshipDiscountByTier2026.otherFaculties;
 };
 
-const getRenewalRequirements = (faculty: string) => {
-  const isClinicalGroup =
-    normalize(faculty).includes('dentistry') || normalize(faculty).includes('pharmacy');
-
-  return scholarshipMaintenance
-    .filter((item) =>
-      isClinicalGroup
-        ? item.faculty.includes('Dentistry') || item.faculty.includes('Pharmacy')
-        : item.faculty.includes('All Other Faculties')
-    )
-    .map(
-      (item) =>
-        `Category ${item.category} (${item.faculty}): Egyptian ${item.egyptianScale}, British ${item.britishScale}.`
-    );
-};
-
-const buildTuitionRows = (studentType: StudentType): TuitionRow[] => {
-  const fees = studentType === 'egyptian' ? egyptianTuitionFees : internationalTuitionFees;
-
-  const formatThreshold = (label: string, value?: { B: string; A: string; AStar: string }) => {
-    if (!value) {
-      return '—';
-    }
-
-    return `${label} B:${value.B} / A:${value.A} / A*:${value.AStar}`;
-  };
-
-  return fees.map((fee) => {
-    const threshold = findThresholdForFaculty(fee.faculty);
-    const discounts = {
-      B: threshold?.discountB || standardDiscounts.B,
-      A: threshold?.discountA || standardDiscounts.A,
-      AStar: threshold?.discountAStar || standardDiscounts.AStar,
-    };
-
-    return {
-      id: `${studentType}-${normalize(fee.faculty)}-${fee.program || 'general'}`,
-      faculty: fee.faculty,
-      program: fee.program,
-      group: fee.category,
-      baseTuition: fee.categoryC,
-      discounts,
-      thresholds: {
-        igcse: formatThreshold('IGCSE', threshold?.certificates.igcse),
-        american: formatThreshold('American', threshold?.certificates.american),
-        thanaweya: formatThreshold('Thanaweya', threshold?.certificates.thanwya),
-        other: formatThreshold('Other', threshold?.certificates.arab),
-      },
-      exceptions: getExceptionNotes(fee.faculty, discounts),
-      scholarshipRules: scholarshipNotes.general,
-      renewalRequirements: getRenewalRequirements(fee.faculty),
-    };
-  });
+const buildTuitionRows = (_studentType: StudentType): TuitionRow[] => {
+  return facultyFeeConfig2026.map((fee) => ({
+    id: fee.key,
+    faculty: fee.faculty,
+    group: groupByFaculty(fee.faculty),
+    tuitionFees: fee.feeBreakdown.tuitionFees,
+    educationalSupportServices: fee.feeBreakdown.educationalSupportServices,
+    administrative: fee.feeBreakdown.administrativeFees,
+    categoryC: fee.feeByTier.C,
+    categoryB: fee.feeByTier.B,
+    categoryA: fee.feeByTier.A,
+    categoryAStar: fee.feeByTier.AStar,
+    thresholdBands: normalizeThresholdBands({
+      thanaweya: fee.thresholds.thanaweya,
+      alAzhar: fee.thresholds.thanaweya,
+      stem: fee.thresholds.thanaweya,
+      nile: fee.thresholds.thanaweya,
+      ig: fee.thresholds.igcse,
+      american: fee.thresholds.american,
+      arab: fee.thresholds.arab,
+    }),
+    discountPolicy: resolveDiscountPolicy(fee.faculty),
+  }));
 };
 
 export const tuitionDataByStudentType: Record<StudentType, TuitionRow[]> = {
@@ -239,15 +198,12 @@ export const tuitionDataByStudentType: Record<StudentType, TuitionRow[]> = {
 };
 
 export const tuitionTableCopy = {
-  searchPlaceholder: 'Search faculty, fees, or thresholds...',
-  filtersTitle: 'Column filters',
+  searchPlaceholder: 'Search faculty...',
   detailsTitle: 'Details',
-  scholarshipRulesTitle: 'Scholarship rules',
-  exceptionTitle: 'Faculty exceptions',
-  renewalTitle: 'Renewal requirements',
+  thresholdTitle: 'Scholarship thresholds',
+  viewThresholds: 'View Thresholds',
+  finalPayableLabel: 'Final payable',
   emptyState: 'No results match the selected filters.',
-  viewDetails: 'View details',
-  hideDetails: 'Hide details',
 };
 
 export const scholarshipSectionCopy = {
@@ -265,11 +221,11 @@ export const tuitionModuleCopy = {
   headers: {
     egyptian: {
       title: 'Egyptian Students Tuition Fees',
-      description: 'Scholarship-aware tuition tables with thresholds by certificate.',
+      description: '2026/2027 tuition structure with category mapping.',
     },
     international: {
       title: 'International Students Tuition Fees',
-      description: 'Scholarship-aware tuition tables with thresholds by certificate.',
+      description: '2026/2027 tuition structure with category mapping.',
     },
   },
 };
