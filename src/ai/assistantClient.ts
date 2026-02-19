@@ -11,11 +11,49 @@ interface AdmissionsAssistantMetadata {
   clarificationQuestion?: string;
 }
 
+/**
+ * Client contract for admissions assistant responses.
+ *
+ * `metadata` is always present for successful responses from both:
+ * - `/api/ai-advisor` when the response payload matches this contract, and
+ * - the local deterministic fallback path in this client.
+ */
 export interface AdmissionsAssistantResponse {
   question: string;
   answer: string;
-  metadata?: AdmissionsAssistantMetadata;
+  metadata: AdmissionsAssistantMetadata;
   context: AdmissionsRAGContext;
+}
+
+function isAdmissionsAssistantMetadata(value: unknown): value is AdmissionsAssistantMetadata {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const metadata = value as Partial<AdmissionsAssistantMetadata>;
+  return (
+    typeof metadata.confidence === "number" &&
+    Array.isArray(metadata.intents) &&
+    Array.isArray(metadata.matchedFaculties) &&
+    typeof metadata.needsClarification === "boolean" &&
+    (metadata.clarificationQuestion === undefined ||
+      typeof metadata.clarificationQuestion === "string")
+  );
+}
+
+function isAdmissionsAssistantResponse(value: unknown): value is AdmissionsAssistantResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const response = value as Partial<AdmissionsAssistantResponse>;
+  return (
+    typeof response.question === "string" &&
+    typeof response.answer === "string" &&
+    isAdmissionsAssistantMetadata(response.metadata) &&
+    !!response.context &&
+    typeof response.context === "object"
+  );
 }
 
 export async function askAdmissionsAssistant(
@@ -30,7 +68,10 @@ export async function askAdmissionsAssistant(
     });
 
     if (response.ok) {
-      return (await response.json()) as AdmissionsAssistantResponse;
+      const payload: unknown = await response.json();
+      if (isAdmissionsAssistantResponse(payload)) {
+        return payload;
+      }
     }
   } catch {
     // Fallback below.

@@ -32,26 +32,43 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  const fullContext = await buildRAGContext();
-  const filteredContext = retrieveRelevantContext(question, fullContext);
-  const result = await generateAdmissionsAnswerResult(question, filteredContext);
+  try {
+    const fullContext = await buildRAGContext();
+    const filteredContext = retrieveRelevantContext(question, fullContext);
+    const result = await generateAdmissionsAnswerResult(question, filteredContext);
 
-  return new Response(
-    JSON.stringify({
-      question,
-      answer: result.answer,
-      metadata: {
-        confidence: result.confidence,
-        intents: result.intents,
-        matchedFaculties: result.matchedFaculties,
-        needsClarification: result.needsClarification,
-        clarificationQuestion: result.clarificationQuestion,
-      },
-      context: filteredContext,
-    }),
-    {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    }
-  );
+    return new Response(
+      JSON.stringify({
+        question,
+        answer: result.answer,
+        metadata: {
+          confidence: result.confidence,
+          intents: result.intents,
+          matchedFaculties: result.matchedFaculties,
+          needsClarification: result.needsClarification,
+          clarificationQuestion: result.clarificationQuestion,
+        },
+        context: filteredContext,
+      }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("[ai-advisor][POST] Failed to process admissions question.", {
+      questionLength: question.length,
+      error,
+    });
+
+    return new Response(
+      JSON.stringify({
+        error: "Unable to process the question right now. Please try again shortly.",
+      }),
+      {
+        status: 500,
+        headers: { "content-type": "application/json" },
+      }
+    );
+  }
 }
