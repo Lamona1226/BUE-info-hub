@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Bot } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
+import { AdmissionsAIAssistantPanel } from '@/components/AdmissionsAIAssistantPanel';
 import { CommandSearch } from '@/components/CommandSearch';
 import { Dashboard } from '@/pages/Dashboard';
 import { FacultiesPage } from '@/pages/FacultiesPage';
@@ -15,12 +17,14 @@ import { PoliciesPage } from '@/pages/PoliciesPage';
 import { ComparePage } from '@/pages/ComparePage';
 import { ScholarshipsPage } from '@/pages/ScholarshipsPage';
 import { ContactsPage } from '@/pages/ContactsPage';
+import { MapPage } from '@/pages/MapPage';
 import { ScholarshipPoliciesPage } from '@/pages/ScholarshipPoliciesPage';
 import { InstallmentPoliciesPage } from '@/pages/InstallmentPoliciesPage';
 import { MinimumAdmissionRequirementsPage } from '@/pages/MinimumAdmissionRequirementsPage';
 
 const AppLayout = () => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   // Global keyboard shortcut for search
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -39,6 +43,7 @@ const AppLayout = () => {
     <div className="min-h-screen bg-background">
       <AppSidebar onSearchClick={() => setSearchOpen(true)} />
       <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      <AdmissionsAIAssistantPanel open={assistantOpen} onOpenChange={setAssistantOpen} />
       
       <main className="lg:ml-64 min-h-screen">
         <div className="container max-w-7xl py-8 px-4 sm:px-6 lg:px-8">
@@ -59,10 +64,20 @@ const AppLayout = () => {
             <Route path="/policies/installment" element={<InstallmentPoliciesPage />} />
             <Route path="/policies/all" element={<PoliciesPage />} />
             <Route path="/contacts" element={<ContactsPage />} />
+            <Route path="/map" element={<MapPage />} />
             <Route path="/compare" element={<ComparePage />} />
           </Routes>
         </div>
       </main>
+
+      <button
+        type="button"
+        onClick={() => setAssistantOpen(true)}
+        aria-label="Open AI Assistant"
+        className="fixed bottom-6 right-6 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        <Bot className="h-5 w-5" />
+      </button>
     </div>
   );
 };

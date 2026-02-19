@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   ChevronDown,
-  Phone
+  Phone,
+  MapPinned
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -37,6 +38,7 @@ const navItems = [
     { path: '/policies/scholarship', label: 'Scholarship Policy' },
   ]},
   { path: '/contacts', label: 'Contacts', icon: Phone },
+  { path: '/map', label: 'Map', icon: MapPinned },
   { path: '/compare', label: 'Compare', icon: GitCompare },
 ];
 

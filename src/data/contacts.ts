@@ -1,3 +1,8 @@
+import {
+  EXCEL_SOURCE_DEPARTMENT_KEY,
+  inferDepartmentFromTitle,
+} from "@/config/contacts-department-map";
+import { excelDirectoryContacts } from "./contacts-directory-excel";
 import { facultyContactsSeed } from "./faculty-contacts-seed";
 
 // ============= Contact Directory Data =============
@@ -6,6 +11,8 @@ import { facultyContactsSeed } from "./faculty-contacts-seed";
    title?: string;
    extension: string;
    department: string;
+  email?: string | string[];
+  externalNumber?: string;
    role?: string;
  }
 
@@ -347,6 +354,64 @@ const dedupeContacts = (contacts: Contact[]): Contact[] => {
   });
 };
 
+const normalizeNameForComparison = (name: string): string =>
+  name
+    .toLowerCase()
+    .replace(/[./,\\-]/g, " ")
+    .replace(/\b(mr|mrs|ms|dr|prof|d)\b/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+const normalizeCompactNameForComparison = (name: string): string =>
+  normalizeNameForComparison(name).replace(/\s+/g, "");
+
+const getFirstNameToken = (name: string): string => normalizeNameForComparison(name).split(" ")[0] ?? "";
+
+const normalizeEmailValue = (email?: string | string[]): string | string[] | undefined => {
+  if (!email) {
+    return undefined;
+  }
+
+  const normalized = (Array.isArray(email) ? email : [email])
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (normalized.length === 0) {
+    return undefined;
+  }
+
+  return normalized.length === 1 ? normalized[0] : normalized;
+};
+
+const mergeEmailValues = (
+  existing?: string | string[],
+  incoming?: string | string[]
+): string | string[] | undefined => {
+  const currentValues = existing ? (Array.isArray(existing) ? existing : [existing]) : [];
+  const incomingValues = incoming ? (Array.isArray(incoming) ? incoming : [incoming]) : [];
+  const unique = Array.from(new Set([...currentValues, ...incomingValues].map((value) => value.trim()).filter(Boolean)));
+
+  if (unique.length === 0) {
+    return undefined;
+  }
+
+  return unique.length === 1 ? unique[0] : unique;
+};
+
+interface ContactRef {
+  departmentIdx: number;
+  contactIdx: number;
+}
+
+export interface ContactMergeAmbiguousCase {
+  incomingName: string;
+  incomingDepartment: string;
+  firstName: string;
+  candidateDepartments: string[];
+  reason: "duplicate_full_name" | "ambiguous_first_name" | "unmapped_title";
+  resolution: "manual_review" | "mapped_by_title";
+}
+
 const mergeDepartments = (source: Department[]): Department[] => {
   const merged = new Map<string, Department>();
 
@@ -373,10 +438,209 @@ const mergeDepartments = (source: Department[]): Department[] => {
   return Array.from(merged.values());
 };
 
-export const departments: Department[] = mergeDepartments([
-  ...baseDepartments,
-  ...facultyContactsSeed,
-]);
+const mergeContactsFromExcel = (
+  source: Department[]
+): { departments: Department[]; ambiguousCases: ContactMergeAmbiguousCase[] } => {
+  const merged = source.map((department) => ({
+    ...department,
+    contacts: department.contacts.map((contact) => ({ ...contact })),
+  }));
+
+  const departmentIndex = new Map<string, number>();
+  const contactByNormalizedName = new Map<string, ContactRef[]>();
+  const contactByFirstName = new Map<string, ContactRef[]>();
+  const ambiguousCases: ContactMergeAmbiguousCase[] = [];
+
+  const registerContactRef = (name: string, ref: ContactRef): void => {
+    const normalizedName = normalizeNameForComparison(name);
+    if (normalizedName) {
+      const refsByName = contactByNormalizedName.get(normalizedName) ?? [];
+      refsByName.push(ref);
+      contactByNormalizedName.set(normalizedName, refsByName);
+    }
+
+    const firstName = getFirstNameToken(name);
+    if (firstName) {
+      const refsByFirstName = contactByFirstName.get(firstName) ?? [];
+      refsByFirstName.push(ref);
+      contactByFirstName.set(firstName, refsByFirstName);
+    }
+  };
+
+  merged.forEach((department, departmentIdx) => {
+    departmentIndex.set(department.name, departmentIdx);
+    department.contacts.forEach((contact, contactIdx) => {
+      registerContactRef(contact.name, { departmentIdx, contactIdx });
+    });
+  });
+
+  const ensureDepartment = (name: string): number => {
+    const existingIdx = departmentIndex.get(name);
+    if (existingIdx !== undefined) {
+      return existingIdx;
+    }
+
+    const createdIdx = merged.length;
+    merged.push({
+      name,
+      contacts: [],
+    });
+    departmentIndex.set(name, createdIdx);
+    return createdIdx;
+  };
+
+  const sourceDepartmentIdx = ensureDepartment(EXCEL_SOURCE_DEPARTMENT_KEY);
+
+  // Stage imported entries into source sheet department first.
+  excelDirectoryContacts.forEach((excelContact) => {
+    const normalizedEmail = normalizeEmailValue(excelContact.email);
+    const stagedContact: Contact = {
+      name: excelContact.name,
+      title: excelContact.title,
+      department: EXCEL_SOURCE_DEPARTMENT_KEY,
+      extension: "",
+      email: normalizedEmail,
+      externalNumber: excelContact.externalNumber,
+    };
+    merged[sourceDepartmentIdx].contacts.push(stagedContact);
+  });
+
+  const allContactRefsExcludingSource = (): ContactRef[] => {
+    const refs: ContactRef[] = [];
+    merged.forEach((department, departmentIdx) => {
+      if (departmentIdx === sourceDepartmentIdx) {
+        return;
+      }
+
+      department.contacts.forEach((_, contactIdx) => {
+        refs.push({ departmentIdx, contactIdx });
+      });
+    });
+    return refs;
+  };
+
+  const findCandidatesByName = (incomingName: string): { full: ContactRef[]; first: ContactRef[] } => {
+    const normalizedName = normalizeNameForComparison(incomingName);
+    const compactName = normalizeCompactNameForComparison(incomingName);
+    const firstName = getFirstNameToken(incomingName);
+    const refs = allContactRefsExcludingSource();
+
+    const full = refs.filter((ref) => {
+      const current = merged[ref.departmentIdx].contacts[ref.contactIdx];
+      const candidateNormalized = normalizeNameForComparison(current.name);
+      const candidateCompact = normalizeCompactNameForComparison(current.name);
+      return candidateNormalized === normalizedName || candidateCompact === compactName;
+    });
+    const first = refs.filter((ref) => {
+      const current = merged[ref.departmentIdx].contacts[ref.contactIdx];
+      return getFirstNameToken(current.name) === firstName;
+    });
+
+    return { full, first };
+  };
+
+  const upsertContactData = (targetRef: ContactRef, incoming: Contact): void => {
+    const existing = merged[targetRef.departmentIdx].contacts[targetRef.contactIdx];
+    existing.email = mergeEmailValues(existing.email, normalizeEmailValue(incoming.email));
+    if (incoming.externalNumber) {
+      existing.externalNumber = incoming.externalNumber;
+    }
+  };
+
+  const appendToDepartment = (departmentName: string, contact: Contact): void => {
+    const targetDepartmentIdx = ensureDepartment(departmentName);
+    merged[targetDepartmentIdx].contacts.push({
+      ...contact,
+      department: departmentName,
+    });
+  };
+
+  const stagedContacts = [...merged[sourceDepartmentIdx].contacts];
+  merged[sourceDepartmentIdx].contacts = [];
+
+  stagedContacts.forEach((stagedContact) => {
+    const { full, first } = findCandidatesByName(stagedContact.name);
+
+    if (full.length === 1) {
+      upsertContactData(full[0], stagedContact);
+      return;
+    }
+
+    if (full.length > 1) {
+      ambiguousCases.push({
+        incomingName: stagedContact.name,
+        incomingDepartment: EXCEL_SOURCE_DEPARTMENT_KEY,
+        firstName: getFirstNameToken(stagedContact.name),
+        candidateDepartments: Array.from(
+          new Set(full.map((ref) => merged[ref.departmentIdx].name))
+        ),
+        reason: "duplicate_full_name",
+        resolution: "manual_review",
+      });
+
+      const mappedDepartment = inferDepartmentFromTitle(stagedContact.title, stagedContact.name);
+      if (mappedDepartment && departmentIndex.has(mappedDepartment)) {
+        appendToDepartment(mappedDepartment, stagedContact);
+      }
+      return;
+    }
+
+    if (first.length === 1) {
+      upsertContactData(first[0], stagedContact);
+      return;
+    }
+
+    if (first.length > 1) {
+      ambiguousCases.push({
+        incomingName: stagedContact.name,
+        incomingDepartment: EXCEL_SOURCE_DEPARTMENT_KEY,
+        firstName: getFirstNameToken(stagedContact.name),
+        candidateDepartments: Array.from(
+          new Set(first.map((ref) => merged[ref.departmentIdx].name))
+        ),
+        reason: "ambiguous_first_name",
+        resolution: "manual_review",
+      });
+    }
+
+    const mappedDepartment = inferDepartmentFromTitle(stagedContact.title, stagedContact.name);
+    if (mappedDepartment && departmentIndex.has(mappedDepartment)) {
+      appendToDepartment(mappedDepartment, stagedContact);
+      if (first.length > 1 || full.length > 1) {
+        const lastAmbiguous = ambiguousCases[ambiguousCases.length - 1];
+        if (lastAmbiguous?.incomingName === stagedContact.name) {
+          lastAmbiguous.resolution = "mapped_by_title";
+        }
+      }
+      return;
+    }
+
+    ambiguousCases.push({
+      incomingName: stagedContact.name,
+      incomingDepartment: EXCEL_SOURCE_DEPARTMENT_KEY,
+      firstName: getFirstNameToken(stagedContact.name),
+      candidateDepartments: [],
+      reason: "unmapped_title",
+      resolution: "manual_review",
+    });
+  });
+
+  // Remove temporary source department after re-homing.
+  const cleanedDepartments = merged.filter((department) => department.name !== EXCEL_SOURCE_DEPARTMENT_KEY);
+
+  return { departments: cleanedDepartments, ambiguousCases };
+};
+
+const mergedContactResult = mergeContactsFromExcel(
+  mergeDepartments([...baseDepartments, ...facultyContactsSeed])
+);
+
+export const departments: Department[] = mergedContactResult.departments;
+export const contactMergeAmbiguousCases: ContactMergeAmbiguousCase[] = mergedContactResult.ambiguousCases;
+
+if (contactMergeAmbiguousCases.length > 0) {
+  console.warn("[contacts] Ambiguous Excel merges require manual review:", contactMergeAmbiguousCases);
+}
  
  // Flatten all contacts for search
  export const getAllContacts = (): (Contact & { departmentName: string })[] => {
@@ -412,6 +676,11 @@ export const departments: Department[] = mergeDepartments([
      c.extension.includes(query) ||
      c.departmentName.toLowerCase().includes(lowerQuery) ||
     (c.title && c.title.toLowerCase().includes(lowerQuery)) ||
+    (c.email &&
+      (Array.isArray(c.email)
+        ? c.email.some((email) => email.toLowerCase().includes(lowerQuery))
+        : c.email.toLowerCase().includes(lowerQuery))) ||
+    (c.externalNumber && c.externalNumber.toLowerCase().includes(lowerQuery)) ||
      (c.role && c.role.toLowerCase().includes(lowerQuery))
    );
  };

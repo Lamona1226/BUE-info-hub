@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Phone, Search } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { departments } from '@/data/contacts';
+import { getContactsDepartmentDisplayName } from '@/data/contacts-department-map';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -10,6 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
+const formatEmail = (email?: string | string[]) =>
+  Array.isArray(email) ? email.join(', ') : (email ?? '—');
  
 export const ContactsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,12 +31,14 @@ export const ContactsPage = () => {
         department: dept,
         rows: [
           ...(dept.head && dept.headExtension
-            ? [{ name: dept.head, title: "Head", extension: dept.headExtension }]
+            ? [{ name: dept.head, title: "Head", extension: dept.headExtension, email: undefined, externalNumber: undefined }]
             : []),
           ...dept.contacts.map((contact) => ({
             name: contact.name,
             title: contact.title,
             extension: contact.extension,
+            email: contact.email,
+            externalNumber: contact.externalNumber,
           })),
         ],
       }));
@@ -42,18 +48,22 @@ export const ContactsPage = () => {
       .map((dept) => {
         const rows = [
           ...(dept.head && dept.headExtension
-            ? [{ name: dept.head, title: "Head", extension: dept.headExtension }]
+            ? [{ name: dept.head, title: "Head", extension: dept.headExtension, email: undefined, externalNumber: undefined }]
             : []),
           ...dept.contacts.map((contact) => ({
             name: contact.name,
             title: contact.title,
             extension: contact.extension,
+            email: contact.email,
+            externalNumber: contact.externalNumber,
           })),
         ].filter((row) => {
           return (
             row.name.toLowerCase().includes(query) ||
             (row.title && row.title.toLowerCase().includes(query)) ||
             row.extension.toLowerCase().includes(query) ||
+            formatEmail(row.email).toLowerCase().includes(query) ||
+            (row.externalNumber && row.externalNumber.toLowerCase().includes(query)) ||
             dept.name.toLowerCase().includes(query)
           );
         });
@@ -89,7 +99,7 @@ export const ContactsPage = () => {
               <SelectItem value="all">All departments</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.name} value={dept.name}>
-                  {dept.name}
+                  {getContactsDepartmentDisplayName(dept.name)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -106,7 +116,9 @@ export const ContactsPage = () => {
           <div key={department.name}>
             <div className="flex items-center gap-2 mb-3">
               <Phone className="h-4 w-4 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">{department.name}</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {getContactsDepartmentDisplayName(department.name)}
+              </h2>
             </div>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
@@ -115,6 +127,8 @@ export const ContactsPage = () => {
                     <th className="text-left p-3 font-semibold">Staff Name</th>
                     <th className="text-left p-3 font-semibold">Title</th>
                     <th className="text-left p-3 font-semibold">Internal Extension</th>
+                    <th className="text-left p-3 font-semibold">Email</th>
+                    <th className="text-left p-3 font-semibold">External Number</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -124,11 +138,13 @@ export const ContactsPage = () => {
                         <td className="p-3 font-medium text-foreground">{row.name}</td>
                         <td className="p-3 text-muted-foreground">{row.title || "—"}</td>
                         <td className="p-3 text-muted-foreground">{row.extension || '—'}</td>
+                        <td className="p-3 text-muted-foreground">{formatEmail(row.email)}</td>
+                        <td className="p-3 text-muted-foreground">{row.externalNumber || '—'}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3} className="p-6 text-center text-muted-foreground">
+                      <td colSpan={5} className="p-6 text-center text-muted-foreground">
                         No contacts listed for this department.
                       </td>
                     </tr>
