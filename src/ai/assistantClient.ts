@@ -1,11 +1,20 @@
 import { buildRAGContext } from "./buildRAGContext";
-import { generateAdmissionsAnswer } from "./generateAdmissionsAnswer";
+import { generateAdmissionsAnswerResult } from "./generateAdmissionsAnswer";
 import { retrieveRelevantContext } from "./retrieveRelevantContext";
-import type { AdmissionsRAGContext } from "./types";
+import type { AdmissionsIntent, AdmissionsRAGContext } from "./types";
+
+interface AdmissionsAssistantMetadata {
+  confidence: number;
+  intents: AdmissionsIntent[];
+  matchedFaculties: string[];
+  needsClarification: boolean;
+  clarificationQuestion?: string;
+}
 
 export interface AdmissionsAssistantResponse {
   question: string;
   answer: string;
+  metadata?: AdmissionsAssistantMetadata;
   context: AdmissionsRAGContext;
 }
 
@@ -30,11 +39,18 @@ export async function askAdmissionsAssistant(
   // Deterministic fallback for environments without server routing.
   const fullContext = await buildRAGContext();
   const filteredContext = retrieveRelevantContext(trimmedQuestion, fullContext);
-  const answer = generateAdmissionsAnswer(trimmedQuestion, filteredContext);
+  const result = generateAdmissionsAnswerResult(trimmedQuestion, filteredContext);
 
   return {
     question: trimmedQuestion,
-    answer,
+    answer: result.answer,
+    metadata: {
+      confidence: result.confidence,
+      intents: result.intents,
+      matchedFaculties: result.matchedFaculties,
+      needsClarification: result.needsClarification,
+      clarificationQuestion: result.clarificationQuestion,
+    },
     context: filteredContext,
   };
 }

@@ -1,7 +1,16 @@
-import type { AdmissionsRAGContext, FacultyContext, RequirementContext } from "./types";
+import { analyzeQuestion } from "./analyzeQuestion";
+import type {
+  AdmissionsAnswerResult,
+  AdmissionsIntent,
+  AdmissionsRAGContext,
+  FacultyContext,
+  RequirementContext,
+} from "./types";
 
 const UNAVAILABLE_MESSAGE =
   "This information is not available in the official admissions data.";
+const FACULTY_CLARIFICATION_MESSAGE =
+  "Please specify the faculty name (for example: Engineering, Dentistry, Business Administration, or Law) so I can provide exact official admissions details.";
 
 const normalize = (value: string): string => value.toLowerCase().trim();
 
@@ -34,32 +43,58 @@ export function generateAdmissionsAnswer(
   question: string,
   context: AdmissionsRAGContext
 ): string {
-  const feeIntent = questionHasAny(question, ["fee", "fees", "tuition", "cost", "pay"]);
-  const scholarshipIntent = questionHasAny(question, [
-    "scholarship",
-    "category a",
-    "category b",
-    "a*",
-    "discount",
-    "tier",
-  ]);
-  const requirementIntent = questionHasAny(question, [
-    "requirement",
-    "requirements",
-    "eligible",
-    "eligibility",
-    "admission",
-    "minimum",
-    "score",
-    "apply",
-  ]);
-  const contactIntent = questionHasAny(question, [
-    "contact",
-    "email",
-    "extension",
-    "phone",
-    "external number",
-  ]);
+  return generateAdmissionsAnswerResult(question, context).answer;
+}
+
+const calculateConfidence = (
+  intents: AdmissionsIntent[],
+  matchedFacultyCount: number,
+  needsClarification: boolean
+): number => {
+  const recognizedIntentCount = intents.filter((intent) => intent !== "general").length;
+  let score = 0.2 + Math.min(recognizedIntentCount * 0.25, 0.5);
+  if (matchedFacultyCount > 0) {
+    score += 0.25;
+  }
+  if (needsClarification) {
+    score -= 0.3;
+  }
+  return Math.max(0, Math.min(1, Number(score.toFixed(2))));
+};
+
+export function generateAdmissionsAnswerResult(
+  question: string,
+  context: AdmissionsRAGContext
+): AdmissionsAnswerResult {
+  const analysis = analyzeQuestion(question, context.faculties);
+  const intentSet = new Set(analysis.intents);
+  const feeIntent = intentSet.has("fees");
+  const scholarshipIntent = intentSet.has("scholarships");
+  const requirementIntent = intentSet.has("requirements");
+  const contactIntent = intentSet.has("contacts");
+  const generalIntent = intentSet.has("general");
+
+  const facultyScopedIntent = feeIntent || scholarshipIntent || requirementIntent;
+  const needsFacultyClarification =
+    facultyScopedIntent && analysis.matchedFaculties.length === 0;
+  const unavailableResult: AdmissionsAnswerResult = {
+    answer: UNAVAILABLE_MESSAGE,
+    confidence: calculateConfidence(analysis.intents, analysis.matchedFaculties.length, false),
+    intents: analysis.intents,
+    matchedFaculties: analysis.matchedFaculties,
+    needsClarification: false,
+  };
+
+  if (needsFacultyClarification) {
+    return {
+      answer: FACULTY_CLARIFICATION_MESSAGE,
+      confidence: calculateConfidence(analysis.intents, analysis.matchedFaculties.length, true),
+      intents: analysis.intents,
+      matchedFaculties: analysis.matchedFaculties,
+      needsClarification: true,
+      clarificationQuestion: FACULTY_CLARIFICATION_MESSAGE,
+    };
+  }
 
   const lines: string[] = [];
   const faculties = [...context.faculties].sort((a, b) => a.name.localeCompare(b.name));
@@ -70,7 +105,7 @@ export function generateAdmissionsAnswer(
 
   if (feeIntent) {
     if (faculties.length === 0) {
-      return UNAVAILABLE_MESSAGE;
+      return unavailableResult;
     }
     faculties.forEach((faculty) => {
       lines.push(...formatFacultyFees(faculty));
@@ -79,7 +114,7 @@ export function generateAdmissionsAnswer(
 
   if (scholarshipIntent) {
     if (faculties.length === 0 || context.scholarships.length === 0) {
-      return UNAVAILABLE_MESSAGE;
+      return unavailableResult;
     }
     const scholarships = [...context.scholarships].sort((a, b) =>
       a.facultyName.localeCompare(b.facultyName)
@@ -104,7 +139,7 @@ export function generateAdmissionsAnswer(
 
   if (requirementIntent) {
     if (faculties.length === 0) {
-      return UNAVAILABLE_MESSAGE;
+      return unavailableResult;
     }
     faculties.forEach((faculty) => {
       lines.push(formatFacultyAdmission(faculty));
@@ -127,7 +162,7 @@ export function generateAdmissionsAnswer(
 
   if (contactIntent) {
     if (context.contacts.length === 0) {
-      return UNAVAILABLE_MESSAGE;
+      return unavailableResult;
     }
     const topContacts = [...context.contacts]
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -145,9 +180,15 @@ export function generateAdmissionsAnswer(
   }
 
   // If no explicit intent but faculty is matched, return concise official overview.
-  if (!feeIntent && !scholarshipIntent && !requirementIntent && !contactIntent) {
+  if (generalIntent && !feeIntent && !scholarshipIntent && !requirementIntent && !contactIntent) {
     if (faculties.length === 0) {
-      return UNAVAILABLE_MESSAGE;
+      return {
+        answer: UNAVAILABLE_MESSAGE,
+        confidence: calculateConfidence(analysis.intents, analysis.matchedFaculties.length, false),
+        intents: analysis.intents,
+        matchedFaculties: analysis.matchedFaculties,
+        needsClarification: false,
+      };
     }
     faculties.forEach((faculty) => {
       lines.push(formatFacultyAdmission(faculty));
@@ -158,8 +199,20 @@ export function generateAdmissionsAnswer(
   }
 
   if (lines.length === 0) {
-    return UNAVAILABLE_MESSAGE;
+    return {
+      answer: UNAVAILABLE_MESSAGE,
+      confidence: calculateConfidence(analysis.intents, analysis.matchedFaculties.length, false),
+      intents: analysis.intents,
+      matchedFaculties: analysis.matchedFaculties,
+      needsClarification: false,
+    };
   }
 
-  return lines.join("\n");
+  return {
+    answer: lines.join("\n"),
+    confidence: calculateConfidence(analysis.intents, analysis.matchedFaculties.length, false),
+    intents: analysis.intents,
+    matchedFaculties: analysis.matchedFaculties,
+    needsClarification: false,
+  };
 }

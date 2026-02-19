@@ -66,3 +66,19 @@ export interface AdmissionsRAGContext {
   requirements: RequirementContext[];
   contacts: ContactContext[];
 }
+
+export type AdmissionsIntent =
+  | "fees"
+  | "scholarships"
+  | "requirements"
+  | "contacts"
+  | "general";
+
+export interface AdmissionsAnswerResult {
+  answer: string;
+  confidence: number;
+  intents: AdmissionsIntent[];
+  matchedFaculties: string[];
+  needsClarification: boolean;
+  clarificationQuestion?: string;
+}

@@ -20,6 +20,8 @@ interface AdmissionsAIAssistantPanelProps {
 interface ChatMessage {
   role: "assistant" | "user";
   content: string;
+  confidence?: number;
+  needsClarification?: boolean;
 }
 
 const initialAssistantMessage =
@@ -47,7 +49,15 @@ export const AdmissionsAIAssistantPanel = ({
 
     try {
       const result = await askAdmissionsAssistant(trimmedQuestion);
-      setMessages((prev) => [...prev, { role: "assistant", content: result.answer }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: result.answer,
+          confidence: result.metadata?.confidence,
+          needsClarification: result.metadata?.needsClarification,
+        },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -98,6 +108,16 @@ export const AdmissionsAIAssistantPanel = ({
                     )}
                   </div>
                   <p className="whitespace-pre-wrap">{message.content}</p>
+                  {message.role === "assistant" && typeof message.confidence === "number" && (
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      Confidence: {(message.confidence * 100).toFixed(0)}%
+                    </p>
+                  )}
+                  {message.role === "assistant" && message.needsClarification && (
+                    <p className="mt-1 text-[11px] text-primary">
+                      Clarification needed to provide faculty-specific official details.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

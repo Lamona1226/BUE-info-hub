@@ -1,5 +1,5 @@
 import { buildRAGContext } from "@/ai/buildRAGContext";
-import { generateAdmissionsAnswer } from "@/ai/generateAdmissionsAnswer";
+import { generateAdmissionsAnswerResult } from "@/ai/generateAdmissionsAnswer";
 import { retrieveRelevantContext } from "@/ai/retrieveRelevantContext";
 
 interface AIAdvisorRequestBody {
@@ -34,12 +34,19 @@ export async function POST(request: Request): Promise<Response> {
 
   const fullContext = await buildRAGContext();
   const filteredContext = retrieveRelevantContext(question, fullContext);
-  const answer = generateAdmissionsAnswer(question, filteredContext);
+  const result = await generateAdmissionsAnswerResult(question, filteredContext);
 
   return new Response(
     JSON.stringify({
       question,
-      answer,
+      answer: result.answer,
+      metadata: {
+        confidence: result.confidence,
+        intents: result.intents,
+        matchedFaculties: result.matchedFaculties,
+        needsClarification: result.needsClarification,
+        clarificationQuestion: result.clarificationQuestion,
+      },
       context: filteredContext,
     }),
     {
