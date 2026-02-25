@@ -33,7 +33,7 @@ export const facultyContactsSeed: Department[] = [
     contacts: [
       { name: "Dr/Omar Karam", title: "Dean", extension: "1601 / 1602", department: "Faculty of Computer Science" },
       { name: "Nouhan Mohamed", title: "Admin", extension: "1612", department: "Faculty of Computer Science" },
-      { name: "Ahmed", title: "Admin", extension: "1624", department: "Faculty of Computer Science" },
+      { name: "Ahmed Abdelraouf", title: "Admin", extension: "1624", department: "Faculty of Computer Science", email: "Ahmed.AbdElRaouf@Bue.edu.eg" },
       { name: "Sara Abdel Rahman", title: "Admin", extension: "1606", department: "Faculty of Computer Science" },
       { name: "Habiba Khaled", title: "Admin", extension: "1605", department: "Faculty of Computer Science" },
       { name: "Samah Metawie", extension: "1520", department: "Faculty of Computer Science" },
