@@ -36,26 +36,50 @@ export interface FacultyFeeConfig2026 {
 }
 
 const defaultThresholdBand: ScholarshipThresholdBand2026 = {
-  B: 85,
-  A: 90,
-  AStar: 98,
+  B: 80,
+  A: 85,
+  AStar: 90,
 };
 
 const defaultAmericanThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 80,
+  A: 90,
+  AStar: 100,
+};
+
+const defaultArabThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 80,
+  A: 85,
+  AStar: 90,
+};
+
+const defaultThanaweyaThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 65,
+  A: 75,
+  AStar: 85,
+};
+
+const highThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 90,
+  A: 93,
+  AStar: 97,
+};
+
+const highAmericanThresholdBand: ScholarshipThresholdBand2026 = {
   B: 90,
   A: 100,
   AStar: 110,
 };
 
-const defaultArabThresholdBand: ScholarshipThresholdBand2026 = {
-  B: 85,
-  A: 90,
-  AStar: 98,
+const highArabThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 90,
+  A: 93,
+  AStar: 97,
 };
 
-const defaultThanaweyaThresholdBand: ScholarshipThresholdBand2026 = {
-  B: 70,
-  A: 75,
+const highThanaweyaThresholdBand: ScholarshipThresholdBand2026 = {
+  B: 77,
+  A: 80,
   AStar: 85,
 };
 
@@ -135,10 +159,10 @@ export const facultyFeeConfig2026: FacultyFeeConfig2026[] = [
     },
     feeByTier: { C: 260000, B: 237000, A: 225500, AStar: 214000 },
     thresholds: {
-      igcse: defaultThresholdBand,
-      american: defaultAmericanThresholdBand,
-      arab: defaultArabThresholdBand,
-      thanaweya: defaultThanaweyaThresholdBand,
+      igcse: highThresholdBand,
+      american: highAmericanThresholdBand,
+      arab: highArabThresholdBand,
+      thanaweya: highThanaweyaThresholdBand,
     },
     minimumAdmission: { egyptianCertificates: 75, internationalCertificates: 78 },
   },
@@ -149,15 +173,15 @@ export const facultyFeeConfig2026: FacultyFeeConfig2026[] = [
     feeBreakdown: {
       tuitionFees: 195000,
       educationalSupportServices: 90000,
-      administrativeFees: 55000,
-      totalCategoryC: 340000,
+      administrativeFees: 45000,
+      totalCategoryC: 330000,
     },
-    feeByTier: { C: 340000, B: 301000, A: 281500, AStar: 262000 },
+    feeByTier: { C: 330000, B: 291000, A: 271500, AStar: 252000 },
     thresholds: {
-      igcse: defaultThresholdBand,
-      american: defaultAmericanThresholdBand,
-      arab: defaultArabThresholdBand,
-      thanaweya: defaultThanaweyaThresholdBand,
+      igcse: highThresholdBand,
+      american: highAmericanThresholdBand,
+      arab: highArabThresholdBand,
+      thanaweya: highThanaweyaThresholdBand,
     },
     minimumAdmission: { egyptianCertificates: 67, internationalCertificates: 70 },
   },
@@ -173,10 +197,10 @@ export const facultyFeeConfig2026: FacultyFeeConfig2026[] = [
     },
     feeByTier: { C: 260000, B: 235000, A: 222500, AStar: 210000 },
     thresholds: {
-      igcse: defaultThresholdBand,
-      american: defaultAmericanThresholdBand,
-      arab: defaultArabThresholdBand,
-      thanaweya: defaultThanaweyaThresholdBand,
+      igcse: highThresholdBand,
+      american: highAmericanThresholdBand,
+      arab: highArabThresholdBand,
+      thanaweya: highThanaweyaThresholdBand,
     },
     minimumAdmission: { egyptianCertificates: 67, internationalCertificates: 70 },
   },
@@ -318,12 +342,12 @@ export const facultyFeeConfig2026: FacultyFeeConfig2026[] = [
     faculty: "Psychology",
     aliases: ["Psychology"],
     feeBreakdown: {
-      tuitionFees: 90000,
+      tuitionFees: 85000,
       educationalSupportServices: 90000,
-      administrativeFees: 40000,
+      administrativeFees: 45000,
       totalCategoryC: 220000,
     },
-    feeByTier: { C: 220000, B: 202000, A: 193000, AStar: 184000 },
+    feeByTier: { C: 220000, B: 203000, A: 194500, AStar: 186000 },
     thresholds: {
       igcse: defaultThresholdBand,
       american: defaultAmericanThresholdBand,
@@ -357,11 +381,11 @@ export const facultyFeeConfig2026: FacultyFeeConfig2026[] = [
     aliases: ["Chinese", "Chinese Language & Culture"],
     feeBreakdown: {
       tuitionFees: 70000,
-      educationalSupportServices: 90000,
+      educationalSupportServices: 0,
       administrativeFees: 25000,
-      totalCategoryC: 185000,
+      totalCategoryC: 95000,
     },
-    feeByTier: { C: 185000, B: 164000, A: 157000, AStar: 150000 },
+    feeByTier: { C: 95000, B: 74000, A: 67000, AStar: 60000 },
     thresholds: {
       igcse: { B: 80, A: 85, AStar: 90 },
       american: { B: 80, A: 90, AStar: 100 },

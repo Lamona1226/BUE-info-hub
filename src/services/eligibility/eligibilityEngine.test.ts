@@ -24,12 +24,12 @@ describe("eligibility hardening", () => {
     expect(threshold).toBeDefined();
     if (!threshold) return;
 
-    expect(resolveTierForScore(84.99, threshold, "igcse")).toBe("C");
-    expect(resolveTierForScore(85, threshold, "igcse")).toBe("B");
-    expect(resolveTierForScore(89.99, threshold, "igcse")).toBe("B");
-    expect(resolveTierForScore(90, threshold, "igcse")).toBe("A");
-    expect(resolveTierForScore(97.99, threshold, "igcse")).toBe("A");
-    expect(resolveTierForScore(98, threshold, "igcse")).toBe("AStar");
+    expect(resolveTierForScore(89.99, threshold, "igcse")).toBe("C");
+    expect(resolveTierForScore(90, threshold, "igcse")).toBe("B");
+    expect(resolveTierForScore(92.99, threshold, "igcse")).toBe("B");
+    expect(resolveTierForScore(93, threshold, "igcse")).toBe("A");
+    expect(resolveTierForScore(96.99, threshold, "igcse")).toBe("A");
+    expect(resolveTierForScore(97, threshold, "igcse")).toBe("AStar");
   });
 
   it("accepts only supported certificate types", () => {
