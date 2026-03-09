@@ -46,26 +46,26 @@ export interface InternationalTuitionFee {
 
 export const internationalTuitionFees: InternationalTuitionFee[] = [
   // Technology
-  { faculty: 'Engineering', program: 'BSc (Hons)', categoryC: 10500, categoryB: 9363, categoryA: 8226, categoryAStar: 7468, category: 'Technology' },
-  { faculty: 'Art & Design', program: 'BA (Hons)', categoryC: 8700, categoryB: 7833, categoryA: 6966, categoryAStar: 6388, category: 'Technology' },
-  { faculty: 'Energy & Environmental Engineering', program: 'BSc (Hons)', categoryC: 8300, categoryB: 7493, categoryA: 6686, categoryAStar: 6148, category: 'Technology' },
-  { faculty: 'Informatics & Computer Science', program: 'BSc (Hons)', categoryC: 9400, categoryB: 8428, categoryA: 7456, categoryAStar: 6808, category: 'Technology' },
+  { faculty: 'Engineering', program: 'BSc (Hons)', categoryC: 11000, categoryB: 9418, categoryA: 8627, categoryAStar: 7836, category: 'Technology' },
+  { faculty: 'Art & Design', program: 'BA (Hons)', categoryC: 9600, categoryB: 8298, categoryA: 7647, categoryAStar: 6996, category: 'Technology' },
+  { faculty: 'Energy & Environmental Engineering', program: 'BSc (Hons)', categoryC: 9350, categoryB: 8098, categoryA: 7472, categoryAStar: 6846, category: 'Technology' },
+  { faculty: 'Informatics & Computer Science', program: 'BSc (Hons)', categoryC: 10850, categoryB: 9298, categoryA: 8522, categoryAStar: 7746, category: 'Technology' },
   // Social Sciences
-  { faculty: 'Business Administration', program: 'BSc (Hons)', categoryC: 9600, categoryB: 8598, categoryA: 7596, categoryAStar: 6928, category: 'Social Sciences' },
-  { faculty: 'Political Science', program: 'BSc (Hons)', categoryC: 6900, categoryB: 6303, categoryA: 5706, categoryAStar: 5308, category: 'Social Sciences' },
-  { faculty: 'Economics', program: 'BSc (Hons)', categoryC: 6900, categoryB: 6303, categoryA: 5706, categoryAStar: 5308, category: 'Social Sciences' },
-  { faculty: 'Communication & Mass Media', program: 'BSc (Hons)', categoryC: 7070, categoryB: 6448, categoryA: 5825, categoryAStar: 5410, category: 'Social Sciences' },
-  { faculty: 'Psychology', program: 'BA (Hons)', categoryC: 7950, categoryB: 7196, categoryA: 6441, categoryAStar: 5938, category: 'Social Sciences' },
-  { faculty: 'Law', program: 'BSc (Hons)', categoryC: 6900, categoryB: 6303, categoryA: 5706, categoryAStar: 5308, category: 'Social Sciences' },
+  { faculty: 'Business Administration', program: 'BSc (Hons)', categoryC: 10500, categoryB: 9018, categoryA: 8277, categoryAStar: 7536, category: 'Social Sciences' },
+  { faculty: 'Political Science', program: 'BSc (Hons)', categoryC: 7950, categoryB: 6978, categoryA: 6492, categoryAStar: 6006, category: 'Social Sciences' },
+  { faculty: 'Economics', program: 'BSc (Hons)', categoryC: 7950, categoryB: 6978, categoryA: 6492, categoryAStar: 6006, category: 'Social Sciences' },
+  { faculty: 'Communication & Mass Media', program: 'BSc (Hons)', categoryC: 7950, categoryB: 6978, categoryA: 6492, categoryAStar: 6006, category: 'Social Sciences' },
+  { faculty: 'Psychology', program: 'BA (Hons)', categoryC: 7950, categoryB: 6978, categoryA: 6492, categoryAStar: 6006, category: 'Social Sciences' },
+  { faculty: 'Law', program: 'BSc (Hons)', categoryC: 7950, categoryB: 6978, categoryA: 6492, categoryAStar: 6006, category: 'Social Sciences' },
   // Languages
-  { faculty: 'English Language and Literature', program: 'BA (Hons)', categoryC: 4700, categoryB: 4106, categoryA: 3908, categoryAStar: 3710, category: 'Languages' },
-  { faculty: 'Chinese Language & Culture', program: 'BA (Hons)', categoryC: 3260, categoryB: 2954, categoryA: 2648, categoryAStar: 2444, category: 'Languages' },
+  { faculty: 'English Language and Literature', program: 'BA (Hons)', categoryC: 4700, categoryB: 4148, categoryA: 3964, categoryAStar: 3780, category: 'Languages' },
+  { faculty: 'Chinese Language & Culture', program: 'BA (Hons)', categoryC: 3450, categoryB: 2823, categoryA: 2614, categoryAStar: 2405, category: 'Languages' },
   // Health
-  { faculty: 'Dentistry', program: 'Bachelor of Dental Surgery', categoryC: 11970, categoryB: 10985, categoryA: 10493, categoryAStar: 10000, category: 'Health' },
-  { faculty: 'Clinical Pharmacy', program: 'Pharm D - Clinical', categoryC: 7950, categoryB: 6971, categoryA: 5991, categoryAStar: 5338, category: 'Health' },
-  { faculty: 'Pharmacy', program: 'Pharm-D', categoryC: 7600, categoryB: 6673, categoryA: 5746, categoryAStar: 5128, category: 'Health' },
-  { faculty: 'Nursing', program: 'BSc (Hons)', categoryC: 2900, categoryB: 2663, categoryA: 2426, categoryAStar: 2268, category: 'Health' },
-  { faculty: 'Physiotherapy', program: 'BSc (Hons)', categoryC: 8350, categoryB: 7536, categoryA: 6721, categoryAStar: 6178, category: 'Health' },
+  { faculty: 'Dentistry', program: 'Bachelor of Dental Surgery', categoryC: 12700, categoryB: 11145, categoryA: 10626, categoryAStar: 9589, category: 'Health' },
+  { faculty: 'Clinical Pharmacy', program: 'Pharm D - Clinical', categoryC: 9050, categoryB: 7558, categoryA: 6812, categoryAStar: 6066, category: 'Health' },
+  { faculty: 'Pharmacy', program: 'Pharm-D', categoryC: 8650, categoryB: 7238, categoryA: 6532, categoryAStar: 5826, category: 'Health' },
+  { faculty: 'Nursing', program: 'BSc (Hons)', categoryC: 3100, categoryB: 2756, categoryA: 2584, categoryAStar: 2412, category: 'Health' },
+  { faculty: 'Physiotherapy', program: 'BSc (Hons)', categoryC: 9450, categoryB: 8178, categoryA: 7542, categoryAStar: 6906, category: 'Health' },
 ];
 
 // ============= Scholarships =============
@@ -579,3 +579,60 @@ export const latePaymentPolicy = {
   period: 'per month',
   description: 'The late payment penalty policy is applied after the Installment\'s due date at a rate of 2% per month.',
 };
+
+// ============= Down Payment & Application Fees =============
+export interface DownPaymentFeeRow {
+  faculty: string;
+  egyptian: number;
+  international: number;
+}
+
+export const downPaymentFees: DownPaymentFeeRow[] = [
+  { faculty: 'Engineering', egyptian: 90000, international: 3000 },
+  { faculty: 'Arts & Design', egyptian: 70000, international: 2500 },
+  { faculty: 'Energy', egyptian: 70000, international: 2500 },
+  { faculty: 'ICS', egyptian: 80000, international: 2800 },
+  { faculty: 'Business Administration', egyptian: 60000, international: 2000 },
+  { faculty: 'Political Science', egyptian: 60000, international: 2000 },
+  { faculty: 'Economics', egyptian: 60000, international: 2000 },
+  { faculty: 'Mass Communication', egyptian: 60000, international: 2000 },
+  { faculty: 'Psychology', egyptian: 60000, international: 2000 },
+  { faculty: 'Law', egyptian: 60000, international: 2000 },
+  { faculty: 'English', egyptian: 40000, international: 1400 },
+  { faculty: 'Chinese', egyptian: 25000, international: 1000 },
+  { faculty: 'Dentistry', egyptian: 100000, international: 3500 },
+  { faculty: 'Clinical Pharmacy', egyptian: 65000, international: 2400 },
+  { faculty: 'Pharmacy', egyptian: 60000, international: 2300 },
+  { faculty: 'Nursing', egyptian: 20000, international: 900 },
+  { faculty: 'Physiotherapy', egyptian: 70000, international: 2500 },
+];
+
+export interface AssessmentFee {
+  label: string;
+  egyptian: number;
+  international: number;
+}
+
+export const applicationFees: AssessmentFee = {
+  label: 'Application',
+  egyptian: 1500,
+  international: 60,
+};
+
+export const englishTestFees: AssessmentFee[] = [
+  {
+    label: 'English Test',
+    egyptian: 1500,
+    international: 60,
+  },
+  {
+    label: 'English Test Retake',
+    egyptian: 1000,
+    international: 40,
+  },
+  {
+    label: 'Portfolio Exam or Aptitude Test',
+    egyptian: 1000,
+    international: 40,
+  },
+];

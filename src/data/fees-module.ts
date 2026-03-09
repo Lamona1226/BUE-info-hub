@@ -1,9 +1,11 @@
 import { Award, Cpu, HeartPulse, Languages, Network } from 'lucide-react';
 import {
   facultyFeeConfig2026,
+  resolveFacultyConfig2026,
   scholarshipDiscountByTier2026,
   type ScholarshipThresholdBand2026,
 } from '@/data/fees-2026';
+import { internationalTuitionFees } from '@/data/fees';
 
 export type StudentType = 'egyptian' | 'international';
 export type FacultyGroupId = 'Technology' | 'Social Sciences' | 'Languages' | 'Health';
@@ -44,6 +46,7 @@ export const facultyGroups: FacultyGroupMeta[] = [
 
 export const feesModuleNavTabs = [
   { label: 'Fees', path: '/fees' },
+  { label: 'Down Payment', path: '/fees/down-payment' },
   { label: 'Accommodation', path: '/fees/accommodation' },
   { label: 'Transportation', path: '/fees/transportation' },
   { label: 'Policies', path: '/policies/all' },
@@ -167,8 +170,8 @@ const resolveDiscountPolicy = (faculty: string): TuitionRow['discountPolicy'] =>
   return scholarshipDiscountByTier2026.otherFaculties;
 };
 
-const buildTuitionRows = (_studentType: StudentType): TuitionRow[] => {
-  return facultyFeeConfig2026.map((fee) => ({
+const buildEgyptianTuitionRows = (): TuitionRow[] =>
+  facultyFeeConfig2026.map((fee) => ({
     id: fee.key,
     faculty: fee.faculty,
     group: groupByFaculty(fee.faculty),
@@ -190,11 +193,76 @@ const buildTuitionRows = (_studentType: StudentType): TuitionRow[] => {
     }),
     discountPolicy: resolveDiscountPolicy(fee.faculty),
   }));
+
+const internationalAnnualBreakdownByFaculty: Record<
+  string,
+  Pick<TuitionRow, 'tuitionFees' | 'educationalSupportServices' | 'administrative'>
+> = {
+  dentistry: { tuitionFees: 10370, educationalSupportServices: 0, administrative: 2330 },
+  pharmacy: { tuitionFees: 7060, educationalSupportServices: 0, administrative: 1590 },
+  "clinical pharmacy": { tuitionFees: 7460, educationalSupportServices: 0, administrative: 1590 },
+  physiotherapy: { tuitionFees: 6360, educationalSupportServices: 1500, administrative: 1590 },
+  engineering: { tuitionFees: 7910, educationalSupportServices: 1500, administrative: 1590 },
+  "energy & environmental engineering": { tuitionFees: 6260, educationalSupportServices: 1500, administrative: 1590 },
+  "informatics & computer science": { tuitionFees: 7760, educationalSupportServices: 1500, administrative: 1590 },
+  "art & design": { tuitionFees: 6510, educationalSupportServices: 1500, administrative: 1590 },
+  "business administration": { tuitionFees: 7410, educationalSupportServices: 1500, administrative: 1590 },
+  "political science": { tuitionFees: 4860, educationalSupportServices: 1500, administrative: 1590 },
+  economics: { tuitionFees: 4860, educationalSupportServices: 1500, administrative: 1590 },
+  law: { tuitionFees: 4860, educationalSupportServices: 1500, administrative: 1590 },
+  "communication & mass media": { tuitionFees: 4860, educationalSupportServices: 1500, administrative: 1590 },
+  psychology: { tuitionFees: 4860, educationalSupportServices: 1500, administrative: 1590 },
+  "english language and literature": { tuitionFees: 1840, educationalSupportServices: 1500, administrative: 1360 },
+  "chinese language & culture": { tuitionFees: 2090, educationalSupportServices: 0, administrative: 1360 },
+  nursing: { tuitionFees: 1720, educationalSupportServices: 750, administrative: 630 },
 };
 
+const normalizeFacultyKey = (value: string): string =>
+  value.toLowerCase().trim();
+
+const buildInternationalTuitionRows = (): TuitionRow[] =>
+  internationalTuitionFees
+    .map((fee) => {
+      const config = resolveFacultyConfig2026(fee.faculty);
+      if (!config) {
+        return null;
+      }
+
+      const annualBreakdown =
+        internationalAnnualBreakdownByFaculty[normalizeFacultyKey(fee.faculty)] ?? {
+          tuitionFees: 0,
+          educationalSupportServices: 0,
+          administrative: 0,
+        };
+
+      return {
+        id: `international-${config.key}`,
+        faculty: config.faculty,
+        group: groupByFaculty(config.faculty),
+        tuitionFees: annualBreakdown.tuitionFees,
+        educationalSupportServices: annualBreakdown.educationalSupportServices,
+        administrative: annualBreakdown.administrative,
+        categoryC: fee.categoryC,
+        categoryB: fee.categoryB,
+        categoryA: fee.categoryA,
+        categoryAStar: fee.categoryAStar,
+        thresholdBands: normalizeThresholdBands({
+          thanaweya: config.thresholds.thanaweya,
+          alAzhar: config.thresholds.thanaweya,
+          stem: config.thresholds.thanaweya,
+          nile: config.thresholds.thanaweya,
+          ig: config.thresholds.igcse,
+          american: config.thresholds.american,
+          arab: config.thresholds.arab,
+        }),
+        discountPolicy: resolveDiscountPolicy(config.faculty),
+      };
+    })
+    .filter((row): row is TuitionRow => Boolean(row));
+
 export const tuitionDataByStudentType: Record<StudentType, TuitionRow[]> = {
-  egyptian: buildTuitionRows('egyptian'),
-  international: buildTuitionRows('international'),
+  egyptian: buildEgyptianTuitionRows(),
+  international: buildInternationalTuitionRows(),
 };
 
 export const tuitionTableCopy = {

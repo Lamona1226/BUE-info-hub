@@ -10,6 +10,7 @@ import { EnglishRequirementsPage } from '@/pages/EnglishRequirementsPage';
 import { RequirementsPage } from '@/pages/RequirementsPage';
 import { RequirementsDetailsPage } from '@/pages/RequirementsDetailsPage';
 import { FeesPage } from '@/pages/FeesPage';
+import { DownPaymentPage } from '@/pages/DownPaymentPage';
 import { AccommodationPage } from '@/pages/AccommodationPage';
 import { TransportationPage } from '@/pages/TransportationPage';
 import { RefundPolicyPage } from '@/pages/RefundPolicyPage';
@@ -56,6 +57,7 @@ const AppLayout = () => {
             <Route path="/requirements/details" element={<Navigate to="/requirements" replace />} />
             <Route path="/requirements/:certificateType" element={<RequirementsDetailsPage />} />
             <Route path="/fees" element={<FeesPage />} />
+            <Route path="/fees/down-payment" element={<DownPaymentPage />} />
             <Route path="/fees/scholarships" element={<ScholarshipsPage />} />
             <Route path="/fees/accommodation" element={<AccommodationPage />} />
             <Route path="/fees/transportation" element={<TransportationPage />} />

@@ -29,6 +29,7 @@ const navItems = [
   { path: '/english', label: 'English Tests', icon: Languages },
   { path: '/fees', label: 'Fees', icon: CreditCard, children: [
     { path: '/fees', label: 'Fees' },
+    { path: '/fees/down-payment', label: 'Down Payment' },
     { path: '/fees/accommodation', label: 'Accommodation' },
     { path: '/fees/transportation', label: 'Transportation' },
   ]},

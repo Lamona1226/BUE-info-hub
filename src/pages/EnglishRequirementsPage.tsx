@@ -6,6 +6,7 @@ import {
   admissionInterviews, 
   admissionInterviewIntro 
 } from '@/data/english-requirements';
+import { englishTestFees, formatEGP, formatGBP } from '@/data/fees';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -222,6 +223,37 @@ export const EnglishRequirementsPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+        </div>
+      </section>
+
+      {/* English Tests Fees */}
+      <section className="mb-8 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">English Tests Fees</h2>
+          <p className="text-sm text-muted-foreground">
+            Official assessment fees for English tests and portfolio/aptitude assessments.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {englishTestFees.map((fee) => (
+            <div
+              key={fee.label}
+              className="rounded-2xl border border-border bg-card p-6 shadow-md flex flex-col gap-4"
+            >
+              <div>
+                <h3 className="text-base font-semibold text-foreground">{fee.label}</h3>
+                <p className="text-xs text-muted-foreground">Assessment fee</p>
+              </div>
+              <div className="rounded-xl border border-border bg-muted/40 p-3">
+                <p className="text-xs text-muted-foreground">Egyptian</p>
+                <p className="text-base font-semibold text-foreground">{formatEGP(fee.egyptian)}</p>
+              </div>
+              <div className="rounded-xl border border-border bg-muted/40 p-3">
+                <p className="text-xs text-muted-foreground">International</p>
+                <p className="text-base font-semibold text-foreground">{formatGBP(fee.international)}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
